@@ -12,6 +12,9 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "config": "^3.3.7",
+    "express-async-errors": "^3.1.1",
+    "g": "^2.0.1",
     "joi": "^17.6.0",
     "joi-objectid": "^2.0.0",
     "joi-password-complexity": "^5.1.0",
