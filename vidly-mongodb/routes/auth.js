@@ -2,9 +2,7 @@ const express=require('express');
 const router=express.Router();
 const bcrypt=require('bcrypt');
 const {User}=require("../models/user");
-const _ =require('lodash');
 const Joi= require('joi');
-const jwt=require('jsonwebtoken');
 
 router.post("/",async(req,res)=>{
     const {error}=validate(req.body);
@@ -23,8 +21,9 @@ router.post("/",async(req,res)=>{
     if(!validPassword){
         return res.status(400).send("Invalid email or password.");
     }
-    const token=jwt.sign({_id:user._id},"privateKey"); ///where private key is private key
-    res.send(token);
+    const token=user.generateAuthToken();
+    
+    res.send(token); 
 });
 
 function validate(req){
@@ -32,7 +31,7 @@ function validate(req){
    
     const schema=Joi.object ({
         email:Joi.string().min(10).required().email()  ,
-        password:Joi.string().required()
+        password:Joi.string().required() 
     });
 
    return schema.validate(req)

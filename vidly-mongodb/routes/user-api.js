@@ -3,8 +3,14 @@ const router=express.Router();
 const bcrypt=require('bcrypt');
 const {User,validateUser}=require("../models/user");
 const _ =require('lodash');
-router.get("/",async(req,res)=>{
-    res.send(await User.find());
+const jwt=require('jsonwebtoken');
+const config=require('config');
+const auth=require('../middleware/auth');
+
+
+router.get("/me",auth,async(req,res)=>{
+    const user=await User.findById({_id:req.user._id}).select("-password");
+    res.send(user);
 })
 
 router.post("/",async(req,res)=>{
@@ -39,7 +45,8 @@ router.post("/",async(req,res)=>{
 
 
     //2nd approach
-    res.send(_.pick(user,['name','email']));
+    const token=jwt.sign({_id: user._id},config.get('jwtPrivateKey')); 
+    res.header('x-auth-token',token).send(_.pick(user,['name','email']));
 });
 
 module.exports=router;

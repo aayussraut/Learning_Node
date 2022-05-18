@@ -1,20 +1,33 @@
+
+
 const express = require("express");
 const router = express.Router();
 
 const { Genre, validate } = require("../models/genre");
+const auth = require("../middleware/auth");
+const admin = require("../middleware/admin");
+const asyncMiddleware=require('../middleware/async');
 
-router.get("/", async (req, res) => {
-  res.send(await Genre.find());
-});
 
+router.get(
+  "/",
+  asyncMiddleware(async(req, res) => {
+    res.send(await Genre.find());
+    // try{
+    // res.send(await Genre.find());
+    // }
+    // catch(ex){
+    //   next(ex);
+    // }
+  })
+);
 
 router.get("/:id", async (req, res) => {
   const genre = await Genre.findById(req.params.id);
   res.send(genre);
 });
 
-
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const { error } = validate(req.body);
   if (error) {
     return res.status(404).send(error.details[0].message);
@@ -26,7 +39,6 @@ router.post("/", async (req, res) => {
   addGenre = await addGenre.save();
   res.send(addGenre);
 });
-
 
 router.put("/:id", async (req, res) => {
   const genre = await Genre.findById(req.params.id);
@@ -46,8 +58,7 @@ router.put("/:id", async (req, res) => {
   res.send(result);
 });
 
-
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", [auth, admin], async (req, res) => {
   const genre = await Genre.deleteOne({ _id: req.params.id });
   res.send(genre);
 });
